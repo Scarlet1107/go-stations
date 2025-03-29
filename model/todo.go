@@ -1,8 +1,19 @@
 package model
 
+import (
+	"time"
+)
+
 type (
 	// A TODO expresses ...
-	TODO struct{}
+	// 学習メモ：Goでは変数名を大文字から始めないとexportされない
+	TODO struct {
+		ID          int       `json:"id"`
+		Subject     string    `json:"subject"`
+		Description string    `json:"description"`
+		CreatedAt   time.Time `json:"created_at"`
+		UpdatedAt   time.Time `json:"updated_at"`
+	}
 
 	// A CreateTODORequest expresses ...
 	CreateTODORequest struct{}
