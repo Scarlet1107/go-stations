@@ -16,9 +16,15 @@ type (
 	}
 
 	// A CreateTODORequest expresses ...
-	CreateTODORequest struct{}
+	CreateTODORequest struct {
+		Subject     string `json:"subject"`
+		Description string `json:"description"`
+	}
 	// A CreateTODOResponse expresses ...
-	CreateTODOResponse struct{}
+	// もしかしたらTODO一つだけかも。テスト通ったときは一つだけだった。けど推奨はTODOという名前もつけることなのでこのまま進める
+	CreateTODOResponse struct {
+		TODO TODO `json:"todo"`
+	}
 
 	// A ReadTODORequest expresses ...
 	ReadTODORequest struct{}
