@@ -20,13 +20,43 @@ func NewTODOService(db *sql.DB) *TODOService {
 }
 
 // CreateTODO creates a TODO on DB.
+// CreateTODOはTODOServeiceのsという構造体と紐づいている
+// ctx, subject, description	普通の引数（呼び出し時に渡す値）
+// (*model.TODO, error)	関数の返り値。保存したTODOとエラー情報
 func (s *TODOService) CreateTODO(ctx context.Context, subject, description string) (*model.TODO, error) {
 	const (
 		insert  = `INSERT INTO todos(subject, description) VALUES(?, ?)`
 		confirm = `SELECT subject, description, created_at, updated_at FROM todos WHERE id = ?`
 	)
 
-	return nil, nil
+	// ExecContextはDBに対してSQLを実行するための関数。（Select以外）
+	res, err := s.db.ExecContext(ctx, insert, subject, description)
+	if err != nil {
+		return nil, err
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+
+	// Selectで挿入したTODOを取得
+	row := s.db.QueryRowContext(ctx, confirm, id)
+
+	var todo model.TODO
+	todo.ID = int(id)
+
+	err = row.Scan(
+		&todo.Subject,
+		&todo.Description,
+		&todo.CreatedAt,
+		&todo.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &todo, nil
 }
 
 // ReadTODO reads TODOs on DB.
