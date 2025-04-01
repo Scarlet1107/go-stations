@@ -38,10 +38,6 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "subject is required", http.StatusBadRequest)
 		return
 	}
-	if req.Description == "" {
-		http.Error(w, "description is required", http.StatusBadRequest)
-		return
-	}
 	res, err := h.Create(r.Context(), &req)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Create error: %v", err), http.StatusInternalServerError)
