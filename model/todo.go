@@ -23,13 +23,18 @@ type (
 	// A CreateTODOResponse expresses ...
 	// もしかしたらTODO一つだけかも。テスト通ったときは一つだけだった。けど推奨はTODOという名前もつけることなのでこのまま進める
 	CreateTODOResponse struct {
-		TODO TODO `json:"todo"`
+		TODO TODO `json:"todos"`
 	}
 
 	// A ReadTODORequest expresses ...
-	ReadTODORequest struct{}
+	ReadTODORequest struct {
+		PrevID int64 `json:"prev_id"`
+		Size   int64 `json:"size"`
+	}
 	// A ReadTODOResponse expresses ...
-	ReadTODOResponse struct{}
+	ReadTODOResponse struct {
+		TODOs []*TODO `json:"todos"`
+	}
 
 	// A UpdateTODORequest expresses ...
 	UpdateTODORequest struct {
