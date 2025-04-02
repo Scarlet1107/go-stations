@@ -23,7 +23,7 @@ type (
 	// A CreateTODOResponse expresses ...
 	// もしかしたらTODO一つだけかも。テスト通ったときは一つだけだった。けど推奨はTODOという名前もつけることなのでこのまま進める
 	CreateTODOResponse struct {
-		TODO TODO `json:"todos"`
+		TODO TODO `json:"todo"`
 	}
 
 	// A ReadTODORequest expresses ...
