@@ -91,7 +91,15 @@ func (h *TODOHandler) Create(ctx context.Context, req *model.CreateTODORequest) 
 
 // Read handles the endpoint that reads the TODOs.
 func (h *TODOHandler) Read(ctx context.Context, req *model.ReadTODORequest) (*model.ReadTODOResponse, error) {
-	_, _ = h.svc.ReadTODO(ctx, 0, 0)
+	todos, err := h.svc.ReadTODO(ctx, req.PrevID, req.Size)
+	if err != nil {
+		return nil, err
+	}
+	if len(todos) == 0 {
+		return nil, &model.ErrNotFound{}
+	}
+	// 編集中...
+
 	return &model.ReadTODOResponse{}, nil
 }
 
