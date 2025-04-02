@@ -44,7 +44,7 @@ func (s *TODOService) CreateTODO(ctx context.Context, subject, description strin
 	row := s.db.QueryRowContext(ctx, confirm, id)
 
 	var todo model.TODO
-	todo.ID = int(id)
+	todo.ID = id
 
 	err = row.Scan(
 		&todo.Subject,
@@ -94,7 +94,7 @@ func (s *TODOService) UpdateTODO(ctx context.Context, id int64, subject, descrip
 	// 	return nil, err
 	// }
 	var todo model.TODO
-	todo.ID = int(id)
+	todo.ID = id
 
 	err = row.Scan(
 		&todo.Subject,
