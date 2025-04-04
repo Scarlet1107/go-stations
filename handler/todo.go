@@ -60,7 +60,8 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		res, err := h.Update(r.Context(), &req)
 		if err != nil {
-			if errors.As(err, &model.ErrNotFound{}) {
+			var notFoundErr *model.ErrNotFound
+			if errors.As(err, &notFoundErr) {
 				http.Error(w, "TODO not found", http.StatusNotFound)
 			} else {
 				http.Error(w, "failed to update", http.StatusInternalServerError)
@@ -115,6 +116,30 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(res)
 
+	case http.MethodDelete:
+		var req model.DeleteTODORequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "Bad Request", http.StatusBadRequest)
+			return
+		}
+		if len(req.IDs) == 0 {
+			http.Error(w, "IDs are required", http.StatusBadRequest)
+			return
+		}
+		err := h.svc.DeleteTODO(r.Context(), req.IDs)
+		if err != nil {
+			var notFoundErr *model.ErrNotFound
+			if errors.As(err, &notFoundErr) {
+				http.Error(w, "Todo not found", http.StatusNotFound)
+			} else {
+				http.Error(w, "failed to delete", http.StatusInternalServerError)
+			}
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(&model.DeleteTODOResponse{})
+
 	default:
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 	}
@@ -161,6 +186,11 @@ func (h *TODOHandler) Update(ctx context.Context, req *model.UpdateTODORequest) 
 
 // Delete handles the endpoint that deletes the TODOs.
 func (h *TODOHandler) Delete(ctx context.Context, req *model.DeleteTODORequest) (*model.DeleteTODOResponse, error) {
-	_ = h.svc.DeleteTODO(ctx, nil)
+
+	err := h.svc.DeleteTODO(ctx, req.IDs)
+	if err != nil {
+		return nil, err
+	}
+
 	return &model.DeleteTODOResponse{}, nil
 }
