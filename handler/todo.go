@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/TechBowl-japan/go-stations/model"
 	"github.com/TechBowl-japan/go-stations/service"
@@ -69,6 +70,51 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(res)
 
+	case http.MethodGet:
+		// クエリパラメータ取得
+		query := r.URL.Query()
+
+		// prev_id を int64 に変換（空なら 0）
+		prevIDStr := query.Get("prev_id")
+		sizeStr := query.Get("size")
+
+		var prevID, size int64
+		var err error
+
+		if prevIDStr != "" {
+			prevID, err = strconv.ParseInt(prevIDStr, 10, 64)
+			if err != nil {
+				http.Error(w, "invalid prev_id", http.StatusBadRequest)
+				return
+			}
+		}
+		if sizeStr != "" {
+			size, err = strconv.ParseInt(sizeStr, 10, 64)
+			if err != nil {
+				http.Error(w, "invalid size", http.StatusBadRequest)
+				return
+			}
+		}
+
+		if size == 0 {
+			size = 5
+		}
+
+		// ReadTODO を呼び出す
+		todos, err := h.svc.ReadTODO(r.Context(), prevID, size)
+		if err != nil {
+			http.Error(w, "failed to read todos", http.StatusInternalServerError)
+			return
+		}
+
+		// レスポンス生成して返す
+		res := &model.ReadTODOResponse{
+			TODOs: todos,
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(res)
+
 	default:
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 	}
@@ -95,12 +141,10 @@ func (h *TODOHandler) Read(ctx context.Context, req *model.ReadTODORequest) (*mo
 	if err != nil {
 		return nil, err
 	}
-	if len(todos) == 0 {
-		return nil, &model.ErrNotFound{}
-	}
-	// 編集中...
 
-	return &model.ReadTODOResponse{}, nil
+	return &model.ReadTODOResponse{
+		TODOs: todos,
+	}, nil
 }
 
 // Update handles the endpoint that updates the TODO.
